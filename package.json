@@ -1,15 +1,20 @@
 {
 	"name": "powerlifter",
 	"publisher": "ultracold273",
-	"displayName": "Powerlift Viewer",
-	"description": "Auto download and preview powerlift logs",
+	"displayName": "Powerlift Logs Viewer",
+	"description": "Automatically download and preview powerlift logs",
 	"version": "0.0.1",
 	"engines": {
 		"vscode": "^1.66.0"
 	},
+	"author": {
+		"name": "Lingxiao Wei",
+		"email": "lxwei@outlook.com"
+	},
 	"categories": [
 		"Other"
 	],
+	"icon": "images/biceps.png",
 	"activationEvents": [
 		"onCommand:powerlifter.openLogs",
 		"onCommand:powerlifter.clearLogs"
