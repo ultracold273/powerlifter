@@ -1,4 +1,4 @@
-# powerlifter README
+# An exention to read powerlift logs 
 
 This is the README for your extension "powerlifter". After writing up a brief description, we recommend including the following sections.
 
