@@ -16,14 +16,14 @@ The powerlift has strong policies for authentication, for the agent used and for
 Powerlift uses cookies for authenticating the user's identity and access, for this extension to work properly, please set up the cookies in the extension settings: 
 
 * Open the Microsoft Edge browser and navigate to `edge://settings/cookies/detail?site=powerlift.acompli.net`.
-![Cookies in Edge browser](/images/edge_cookies.png)
+![Cookies in Edge browser](https://github.com/ultracold273/powerlifter/raw/0.3.0/images/edge_cookies.png)
 If you do not see any cookies, please check if you are logged in the powerlift.
 
 * Copy the content of each cookie to respective settings in extension:
-![Set cookies in extension settings](/images/extension-settings.gif)
+![Set cookies in extension settings](https://github.com/ultracold273/powerlifter/raw/0.3.0/images/extension-settings.gif)
 
 Then you'll be able to download and open powerlift logs:
-* ![Open powerlift logs](/images/usage.gif)
+* ![Open powerlift logs](https://github.com/ultracold273/powerlifter/raw/0.3.0/images/usage.gif)
 
 ## Extension Settings
 
