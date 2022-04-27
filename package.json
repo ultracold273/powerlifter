@@ -1,9 +1,9 @@
 {
 	"name": "powerlifter",
-	"publisher": "ultracold273",
+	"publisher": "lingxiaowei",
 	"displayName": "Powerlift Logs Viewer",
 	"description": "Automatically download and preview powerlift logs",
-	"version": "0.0.1",
+	"version": "0.1.0",
 	"engines": {
 		"vscode": "^1.66.0"
 	},
@@ -14,6 +14,10 @@
 	"categories": [
 		"Other"
 	],
+	"repository": {
+		"type": "git",
+		"url": "https://github.com/ultracold273/powerlifter"
+	},
 	"icon": "images/biceps.png",
 	"activationEvents": [
 		"onCommand:powerlifter.openLogs",

@@ -69,7 +69,6 @@ function uncompressLogs(zipUri: vscode.Uri): Thenable<vscode.Uri> {
 		console.log(`Extract to ${folderPath}`);
 		const zipFile = new zip(zipPath);
 		zipFile.extractAllTo(folderUri.fsPath);
-		console.log(`Extract to ${folderUri.fsPath}`);
 		resolve(folderUri);
 	});
 }
@@ -102,7 +101,7 @@ function validateCookies(cookie: PowerliftCookie): boolean {
 	return cookie.session !== "" && cookie.aiUser !== "" && cookie.aiAuthUser !== "";
 }
 
-function getLogStorage(context: vscode.ExtensionContext) {
+function getLogStorage(defaultStorageUri: vscode.Uri) {
 	const setting = vscode.workspace.getConfiguration('powerlifter.settings');
 	const storageLocation = setting.get<string>('logStorageLocation')!;
 	let useDefaultStorage = storageLocation === "";
@@ -116,8 +115,10 @@ function getLogStorage(context: vscode.ExtensionContext) {
 	console.log(`Use default storage: ${useDefaultStorage}`);
 
 	if (useDefaultStorage) {
-		fs.mkdirSync(context.globalStorageUri.fsPath);
-		return context.globalStorageUri;
+		if (!fs.existsSync(defaultStorageUri.fsPath)) {
+			fs.mkdirSync(defaultStorageUri.fsPath);
+		}
+		return defaultStorageUri;
 	} else {
 		return vscode.Uri.file(storageLocation);
 	}
@@ -131,7 +132,7 @@ export function activate(context: vscode.ExtensionContext) {
 	// This line of code will only be executed once when your extension is activated
 	console.log('Congratulations, your extension "powerlifter" is now active!');
 
-	const storageUri = getLogStorage(context);
+	const storageUri = getLogStorage(context.globalStorageUri);
 
 	// The command has been defined in the package.json file
 	// Now provide the implementation of the command with registerCommand
@@ -143,19 +144,26 @@ export function activate(context: vscode.ExtensionContext) {
 				.then(id => {
 					console.log(`Get ID from input: ${id}`);
 					if (id !== undefined) {
-						return downloadLogs(id, cookies, storageUri);
-					}
-				}, commonErrorHandler)
-				.then(zipUri => {
-					if (zipUri !== undefined) {
-						console.log(`Downloaded Logs`);
-						return uncompressLogs(zipUri);
+						// return downloadLogs(id, cookies, storageUri);
+						return vscode.window.withProgress({
+							location: vscode.ProgressLocation.Notification
+						}, (progress, token) => {
+							progress.report({ message: 'Downloading logs..' });
+							return downloadLogs(id, cookies, storageUri).then(zipUri => {
+								progress.report({ message: 'Uncompressing logs..' });
+								return uncompressLogs(zipUri);
+							}, commonErrorHandler);
+						});
 					}
 				}, commonErrorHandler)
 				.then(folderUri => {
 					if (folderUri !== undefined) {
 						console.log(`Opening folder ${folderUri.fsPath}`);
-						vscode.commands.executeCommand('vscode.openFolder', folderUri);
+						if (fs.existsSync(folderUri.fsPath)) {
+							vscode.commands.executeCommand('vscode.openFolder', folderUri);
+						} else {
+							vscode.window.showErrorMessage('Error!');
+						}
 					}
 				});
 		} else {

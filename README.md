@@ -1,33 +1,45 @@
-# An exention to read powerlift logs 
+# An extension to read powerlift logs 
 
-This extension helps to read powerlift logs in a more convienient way. Type the session id in the prompt windows, you'll able to view the logs.
+This extension helps to read powerlift logs in a more convienient way. Type the session id in the prompt windows, it helps you download automatically and then you'll able to view the logs.
 
 ## Features
 
+* Automatically download the powerlift logs to specificied local storage, uncompress and open it.
+* Clear the log files in local storage.
+
+## Setup
+
+**Pre-requisite**: Make sure you have the access to Microsoft powerlift and can successfully loggin with Microsoft Edge browser.
+
+The powerlift has strong policies for authentication, for the agent used and for the accessed platform. Please make sure you comply with assgined polices when using this extension.
+
+Powerlift uses cookies for authenticating the user's identity and access, for this extension to work properly, please set up the cookies in the extension settings: 
+
+* Open the Microsoft Edge browser and navigate to `edge://settings/cookies/detail?site=powerlift.acompli.net`.
+![Cookies in Edge browser]()
+If you do not see any cookies, please check if you are logged in the powerlift.
+
+* Copy the content of each cookie to respective settings in extension:
+![Set cookies in extension settings]()
+
+Then you'll be able to download and open powerlift logs:
+![Open powerlift logs]()
+
 ## Extension Settings
-
-Include if your extension adds any VS Code settings through the `contributes.configuration` extension point.
-
-For example:
 
 This extension contributes the following settings:
 
-* `myExtension.enable`: enable/disable this extension
-* `myExtension.thing`: set to `blah` to do something
+* `powerlifter.settings.logStorageLocation`: the path for storing powerlift logs and uncompressed folders, default to the global storage of this extension. (Optional)
+* `powerlifter.cookie.session`: the `SESSION` cookie used to access powerlift logs. (Required)
+* `powerlifter.cookie.aiAuthuser`: the `aiAuthuser` cookie used to access powerlift logs. (Required)
+* `powerlifter.cookie.aiUser`: the  `aiUser` cookie used to access powerlift logs. (Required)
 
-## Known Issues
+## Disclaimer
 
-\[UnderConstruction...\]
+This extension is aimed at providing 
 
 ## Release Notes
 
 ### 1.0.0
 
 Initial release of ...
-
------------------------------------------------------------------------------------------------------------
-## Following extension guidelines
-
-Ensure that you've read through the extensions guidelines and follow the best practices for creating your extension.
-
-* [Extension Guidelines](https://code.visualstudio.com/api/references/extension-guidelines)
