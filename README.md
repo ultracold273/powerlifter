@@ -37,3 +37,14 @@ This extension contributes the following settings:
 ## Disclaimer
 
 This extension is aimed at providing fast access to the powerlift logs for developers, and the cookie data is stored in the settings in plaintext. It is your own risk to protect the cookies from any malicious uses.
+
+## Releases
+
+### 0.3.0
+Add support to search logs by easy Id.
+
+### 0.2.0
+Add progress bar when downloading logs.
+
+### 0.1.0
+Basic functions.

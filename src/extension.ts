@@ -6,7 +6,7 @@ import * as fs from 'fs';
 import * as zip from 'adm-zip';
 import { IncomingMessage } from 'http';
 import * as path from 'path';
-
+import { RemoteSearchResponse } from './domain';
 
 function storeLogs(response: IncomingMessage, id: string, storage: vscode.Uri): Thenable<vscode.Uri> {
 	return new Promise((resolve, reject) => {
@@ -18,9 +18,48 @@ function storeLogs(response: IncomingMessage, id: string, storage: vscode.Uri): 
 		file.on('finish', () => {
 			resolve(targetUri);
 		});
-		file.on('error', (_) => {
-			reject();
+		file.on('error', reject);
+	});
+}
+
+function getSessionId(searchId: string, cookies: PowerliftCookie): Thenable<string> {
+	return new Promise((resolve, reject) => {
+		const options = {
+			hostname: 'powerlift.acompli.net',
+			port: 443,
+			path: `/gym/incidents/search?q=${searchId}`,
+			method: 'GET'
+		};
+
+		const request = https.request(options, response => {
+			console.log(`Search logs: HTTP ${response.statusCode}`);
+			switch (response.statusCode) {
+				case undefined:
+					reject('Response code undefined in getting session id.');
+					break;
+				case 200:
+					let rawData: string[] = [];
+					response.on('data', chunk => rawData.push(chunk));
+					response.on('end', () => {
+						const rawResponseData = rawData.join();
+						const remoteResponse = JSON.parse(rawResponseData) as RemoteSearchResponse;
+						const sessionId = remoteResponse.results[0].incident.meta.id;
+						resolve(sessionId);
+					});
+					break;
+				default:
+					reject(`Received ${response.statusCode}`);
+			}
 		});
+
+		request.setHeader('Cookie', [
+			`ai_user=${cookies.aiUser}`,
+			`ai_authUser=${cookies.aiAuthUser}`,
+			`SESSION=${cookies.session}`
+		]);
+
+		request.on('error', reject);
+		request.end();
 	});
 }
 
@@ -34,15 +73,15 @@ function downloadLogs(id: string, cookies: PowerliftCookie, storage: vscode.Uri)
 		};
 
 		const request = https.request(options, response => {
-			console.log(`${response.statusCode}`);
+			console.log(`Download logs: HTTP ${response.statusCode}`);
 			switch (response.statusCode) {
 				case undefined:
-					reject();
+					reject('Response code undefined.');
 					break;
 				case 200:
 					resolve(storeLogs(response, id, storage));
 					break;
-				default: reject();
+				default: reject(`Received ${response.statusCode}.`);
 			}
 		});
 
@@ -140,7 +179,7 @@ export function activate(context: vscode.ExtensionContext) {
 	let openLogsDisposable = vscode.commands.registerCommand('powerlifter.openLogs', () => {
 		const cookies = readPowerliftCookies();
 		if (validateCookies(cookies)) {
-			vscode.window.showInputBox({ prompt: 'Enter Session Id: ' })
+			vscode.window.showInputBox({ prompt: 'Enter Easy Id or UUID: ' })
 				.then(id => {
 					console.log(`Get ID from input: ${id}`);
 					if (id !== undefined) {
@@ -148,11 +187,16 @@ export function activate(context: vscode.ExtensionContext) {
 						return vscode.window.withProgress({
 							location: vscode.ProgressLocation.Notification
 						}, (progress, token) => {
-							progress.report({ message: 'Downloading logs..' });
-							return downloadLogs(id, cookies, storageUri).then(zipUri => {
-								progress.report({ message: 'Uncompressing logs..' });
-								return uncompressLogs(zipUri);
-							}, commonErrorHandler);
+							progress.report({ message: 'Searching for logs...' });
+							return getSessionId(id, cookies)
+								.then(sessionId => {
+									progress.report({ message: 'Downloading logs..' });
+									return downloadLogs(sessionId, cookies, storageUri);
+								}, commonErrorHandler)
+								.then(zipUri => {
+									progress.report({ message: 'Uncompressing logs..' });
+									return uncompressLogs(zipUri);
+								}, commonErrorHandler);
 						});
 					}
 				}, commonErrorHandler)
@@ -162,7 +206,7 @@ export function activate(context: vscode.ExtensionContext) {
 						if (fs.existsSync(folderUri.fsPath)) {
 							vscode.commands.executeCommand('vscode.openFolder', folderUri);
 						} else {
-							vscode.window.showErrorMessage('Error!');
+							vscode.window.showErrorMessage('Error: the file does not contain any thing.');
 						}
 					}
 				});
