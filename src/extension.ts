@@ -42,9 +42,14 @@ function getSessionId(searchId: string, cookies: PowerliftCookie): Thenable<stri
 					response.on('data', chunk => rawData.push(chunk));
 					response.on('end', () => {
 						const rawResponseData = rawData.join();
+						console.log(`${rawResponseData}`);
 						const remoteResponse = JSON.parse(rawResponseData) as RemoteSearchResponse;
-						const sessionId = remoteResponse.results[0].incident.meta.id;
-						resolve(sessionId);
+						if (remoteResponse.results.length === 0) {
+							reject('Cannot find logs..');
+						} else {
+							const sessionId = remoteResponse.results[0].incident.meta.id;
+							resolve(sessionId);
+						}
 					});
 					break;
 				default:
